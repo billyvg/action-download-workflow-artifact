@@ -1,0 +1,8 @@
+dist/
+lib/
+<<<<<<< HEAD
+node_modules/
+=======
+node_modules/
+jest.config.js
+>>>>>>> actions-main
