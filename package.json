@@ -37,7 +37,9 @@
     ]
   },
   "dependencies": {
-    "@actions/core": "^1.6.0"
+    "@actions/artifact": "^0.6.1",
+    "@actions/core": "^1.6.0",
+    "github-fetch-workflow-artifact": "^1.0.6"
   },
   "devDependencies": {
     "@types/jest": "^27.4.0",

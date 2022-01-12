@@ -1,11 +1,21 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Sentry'
+name: 'action-download-workflow-artifact'
+description: 'Downloads a GitHub artifact for a workflow (from a different branch)'
+author: 'Billy Vong'
 inputs:
-  milliseconds: # change this
+  artifact:
+    description: 'The name of the artifact to download'
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  branch:
+    description: 'The branch to download artifacts from'
+    default: 'main'
+    required: true
+  workflow:
+    description: 'The workflow name to download artifact from. By default, the workflow that uses this action will be used.'
+    required: false
+  github-token:
+    description: 'GitHub token'
+    default: '${{ github.token }}'
+    required: true
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'
