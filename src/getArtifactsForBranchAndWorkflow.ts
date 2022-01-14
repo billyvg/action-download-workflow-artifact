@@ -1,32 +1,32 @@
-import {GetResponseDataTypeFromEndpointMethod} from '@octokit/types';
-import * as core from '@actions/core';
-import * as github from '@actions/github';
+import {GetResponseDataTypeFromEndpointMethod} from '@octokit/types'
+import * as core from '@actions/core'
+import * as github from '@actions/github'
 
-type Octokit = ReturnType<typeof github.getOctokit>;
+type Octokit = ReturnType<typeof github.getOctokit>
 type WorkflowRun = GetResponseDataTypeFromEndpointMethod<
   Octokit['actions']['listWorkflowRuns']
->['workflow_runs'][number];
+>['workflow_runs'][number]
 type Artifacts = GetResponseDataTypeFromEndpointMethod<
   Octokit['actions']['listWorkflowRunArtifacts']
->['artifacts'][number];
+>['artifacts'][number]
 
 export type GetArtifactsForBranchAndWorkflowReturn = {
-  artifact: Artifacts;
-  workflowRun: WorkflowRun;
-} | null;
+  artifact: Artifacts
+  workflowRun: WorkflowRun
+} | null
 
 export type GetArtifactsForBranchAndWorkflow = {
-  owner: string;
-  repo: string;
-  branch: string;
-  workflow_id: string;
-  artifactName: string;
-  commit?: string;
-};
+  owner: string
+  repo: string
+  branch: string
+  workflowName: string
+  artifactName: string
+  commit?: string
+}
 
 // max pages of workflows to pagination through
-const MAX_PAGES = 10;
-const PER_PAGE_LIMIT = 10;
+const MAX_PAGES = 10
+const PER_PAGE_LIMIT = 10
 
 /**
  * Fetch artifacts from a workflow run from a branch
@@ -39,27 +39,59 @@ export async function getArtifactsForBranchAndWorkflow(
   {
     owner,
     repo,
-    workflow_id,
+    workflowName,
     branch,
     commit,
     artifactName,
   }: GetArtifactsForBranchAndWorkflow
 ): Promise<GetArtifactsForBranchAndWorkflowReturn> {
   core.startGroup(
-    `getArtifactsForBranchAndWorkflow - workflow:"${workflow_id}",  branch:"${branch}"${
+    `getArtifactsForBranchAndWorkflow - workflow:"${workflowName}",  branch:"${branch}"${
       commit ? `,  commit:"${commit}"` : ''
     }`
-  );
+  )
 
-  let currentPage = 0;
-  let completedWorkflowRuns: WorkflowRun[] = [];
+  let repositoryWorkflow = null
+
+  //
+  // Find workflow id
+  //
+  for await (const response of octokit.paginate.iterator(
+    octokit.actions.listRepoWorkflows,
+    {
+      owner,
+      repo,
+    }
+  )) {
+    const targetWorkflow = response.data.find(({name}) => name === workflowName)
+
+    // If not found in responses, continue to search on next page
+    if (!targetWorkflow) {
+      continue
+    }
+
+    repositoryWorkflow = targetWorkflow
+    break
+  }
+
+  if (!repositoryWorkflow) {
+    core.error(
+      `Unable to find workflow with name "${workflowName}" in the repository`
+    )
+    core.endGroup()
+    return null
+  }
+
+  const workflow_id = repositoryWorkflow.id
+
+  let currentPage = 0
+  let completedWorkflowRuns: WorkflowRun[] = []
 
   for await (const response of octokit.paginate.iterator(
     octokit.actions.listWorkflowRuns,
     {
       owner,
       repo,
-      // Below is typed incorrectly, it needs to be a string but typed as number
       workflow_id,
       branch,
       status: 'completed',
@@ -67,9 +99,9 @@ export async function getArtifactsForBranchAndWorkflow(
     }
   )) {
     if (!response.data.length) {
-      core.warning(`Workflow ${workflow_id} not found in branch ${branch}`);
-      core.endGroup();
-      return null;
+      core.warning(`Workflow ${workflow_id} not found in branch ${branch}`)
+      core.endGroup()
+      return null
     }
 
     // XXX: This function is only used by `retrieveBaseSnapshots`, which means that base snapshots
@@ -80,19 +112,19 @@ export async function getArtifactsForBranchAndWorkflow(
     const workflowRuns = response.data.filter(
       workflowRun =>
         workflowRun.head_repository.full_name === `${owner}/${repo}`
-    );
+    )
 
     const workflowRunsForCommit = commit
       ? workflowRuns.filter(
           (run: typeof workflowRuns[number]) => run.head_sha === commit
         )
-      : workflowRuns;
+      : workflowRuns
 
     if (workflowRunsForCommit.length) {
       completedWorkflowRuns = completedWorkflowRuns.concat(
         workflowRunsForCommit
-      );
-      break;
+      )
+      break
     }
 
     if (currentPage > MAX_PAGES) {
@@ -100,17 +132,17 @@ export async function getArtifactsForBranchAndWorkflow(
         `Workflow ${workflow_id} not found in branch: ${branch}${
           commit ? ` and commit: ${commit}` : ''
         }`
-      );
-      core.endGroup();
-      return null;
+      )
+      core.endGroup()
+      return null
     }
 
-    currentPage++;
+    currentPage++
   }
 
   // Search through workflow artifacts until we find a workflow run w/ artifact name that we are looking for
   for (const workflowRun of completedWorkflowRuns) {
-    core.debug(`Checking artifacts for workflow run: ${workflowRun.html_url}`);
+    core.debug(`Checking artifacts for workflow run: ${workflowRun.html_url}`)
 
     const {
       data: {artifacts},
@@ -118,27 +150,26 @@ export async function getArtifactsForBranchAndWorkflow(
       owner,
       repo,
       run_id: workflowRun.id,
-    });
+    })
 
     if (!artifacts) {
       core.debug(
         `Unable to fetch artifacts for branch: ${branch}, workflow: ${workflow_id}, workflowRunId: ${workflowRun.id}`
-      );
+      )
     } else {
-      const foundArtifact = artifacts.find(({name}) => name === artifactName);
+      const foundArtifact = artifacts.find(({name}) => name === artifactName)
       if (foundArtifact) {
-        core.debug(`Found suitable artifact: ${foundArtifact.url}`);
-        core.endGroup();
+        core.debug(`Found suitable artifact: ${foundArtifact.url}`)
+        core.endGroup()
         return {
           artifact: foundArtifact,
           workflowRun,
-        };
+        }
       }
     }
   }
 
-  core.warning(`Artifact not found: ${artifactName}`);
-  core.endGroup();
-  return null;
+  core.warning(`Artifact not found: ${artifactName}`)
+  core.endGroup()
+  return null
 }
-
