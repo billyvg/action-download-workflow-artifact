@@ -38,7 +38,7 @@ jobs:
         with:
           artifact: integration-test-artifact
           branch: main
-          workflow: 'integration - save artifact'
+          workflow: 'integration test setup'
           path: download
 
       - run: ls download/README.md
