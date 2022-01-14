@@ -27,8 +27,8 @@ A GitHub action to download an artifact from a different branch and/or workflow.
 
 | name | description | default value |
 | ---- | ----------- | ------------- |
-| artifact | The name of the artifact to download | |
-| branch | The branch to download artifact from | main |
-| github-token | GitHub token | `${{ github.token }}` |
-| path | The path to download the artifact to | |
-| workflow | The *name* of the workflow to download the artifact from. Note this is the human readable name and not the filename. | The workflow that uses this action |
+| `artifact` | The name of the artifact to download | |
+| `branch` | The branch to download artifact from | `main` |
+| `github-token` | GitHub token | `${{ github.token }}` |
+| `path` | The path to download the artifact to | |
+| `workflow` | The *name* of the workflow to download the artifact from. Note this is the human readable name and not the filename. | The workflow that uses this action |
