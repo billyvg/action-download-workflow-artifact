@@ -1,16 +1,9 @@
-<p>
-  <a href="https://github.com/billyvg/action-download-workflow-artifact/actions">
-    <img
-    alt="action-download-workflow-artifact status"
-    src="https://github.com/billyvg/action-download-workflow-artifact/workflows/test/badge.svg">
-    </a>
-</p>
-
-# action-download-workflow-artifact
+# action-download-workflow-artifact [![test](https://github.com/billyvg/action-download-workflow-artifact/actions/workflows/test.yml/badge.svg?event=push)](https://github.com/billyvg/action-download-workflow-artifact/actions/workflows/test.yml)
 
 A GitHub action to download an artifact from a different branch and/or workflow. If you have tried to use https://github.com/actions/download-artifact or [@actions/artifact](https://www.npmjs.com/package/@actions/artifact) you'll realize their limitations for downloading artifacts.
 
 
+*NOTE* This currently relies on `wget` and `unzip` when downloading and extracting the artifact archive. This means it probably won't run on Windows runners.
 
 ## Usage
 
