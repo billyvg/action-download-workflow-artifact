@@ -9,13 +9,16 @@ inputs:
     description: 'The branch to download artifacts from'
     default: 'main'
     required: true
-  workflow:
-    description: 'The workflow name to download artifact from. By default, the workflow that uses this action will be used.'
-    required: false
   github-token:
     description: 'GitHub token'
     default: '${{ github.token }}'
     required: true
+  path:
+    description: 'The path to download the artifact to'
+    required: false
+  workflow:
+    description: 'The workflow name to download artifact from. By default, the workflow that uses this action will be used.'
+    required: false
 runs:
   using: 'node16'
   main: 'dist/index.js'
