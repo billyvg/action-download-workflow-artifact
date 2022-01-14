@@ -3,7 +3,7 @@
 # `index.js` is the code that will run.
 # For our project, we generate this file through a build process from other source files.
 # We need to make sure the checked-in `index.js` actually matches what we expect it to be.
-name: Check dist/
+name: dist
 
 on:
   push:
@@ -18,15 +18,16 @@ on:
 
 jobs:
   check-dist:
+    name: check dist
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set Node.js 12.x
-        uses: actions/setup-node@v2.5.1
+      - uses: actions/setup-node@v2
         with:
-          node-version: 12.x
+          cache: yarn
+          node-version: 16.x
 
       - name: Install dependencies
         run: yarn

@@ -15,7 +15,30 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           cache: yarn
-          node-version: 12
+          node-version: 16.x
+
       - run: yarn install
       - run: yarn lint
       - run: yarn test
+
+  integration-test:
+    name: integration test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          cache: yarn
+          node-version: 16.x
+
+      - run: yarn install
+      - run: yarn dist
+
+      - uses: ./
+        with:
+          artifact: integration-test-artifact
+          branch: main
+          workflow: 'integration test setup'
+          path: download
+
+      - run: ls download/README.md
