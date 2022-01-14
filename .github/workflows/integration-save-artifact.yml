@@ -1,0 +1,15 @@
+name: 'integration test setup'
+
+on: push
+
+
+jobs:
+  save:
+    name: save artifact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/upload-artifact@v2
+        with:
+          name: integration-test-artifact
+          path: README.md
