@@ -19,6 +19,9 @@ inputs:
   workflow:
     description: 'The workflow name to download artifact from. By default, the workflow that uses this action will be used.'
     required: false
+  workflowEvent:
+    description: 'Only search for workflows that were triggered by a specific workflow event (e.g. `push`)'
+    required: false
 runs:
   using: 'node16'
   main: 'dist/index.js'

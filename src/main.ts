@@ -1,7 +1,7 @@
 import * as github from '@actions/github';
 import * as core from '@actions/core';
-import {getArtifactsForBranchAndWorkflow} from './getArtifactsForBranchAndWorkflow';
-import {download} from './download';
+
+import download from 'github-fetch-workflow-artifact';
 
 async function run(): Promise<void> {
   const token = core.getInput('github-token');
@@ -18,6 +18,7 @@ async function run(): Promise<void> {
   const branch = core.getInput('branch');
   const workflowName =
     core.getInput('workflow') || process.env.GITHUB_WORKFLOW || '';
+  const workflowEvent = core.getInput('workflowEvent');
   const artifactName = core.getInput('artifact');
   const downloadPath = core.getInput('path');
 
@@ -26,27 +27,12 @@ async function run(): Promise<void> {
   }
 
   try {
-    // Need to do a bunch of API calls to actually find artifacts for this
-    // workflow that have previously been run (e.g. on a different branch)
-    const resp = await getArtifactsForBranchAndWorkflow(octokit, {
+    await download(octokit, {
       owner,
       repo,
       branch,
       workflowName,
-      artifactName,
-    });
-
-    if (!resp?.artifact) {
-      core.setFailed('Unable to find artifact');
-      return;
-    }
-
-    core.debug(`Artifact url: ${resp?.artifact.url}`);
-
-    await download(octokit, {
-      owner,
-      repo,
-      artifactId: resp.artifact.id,
+      workflowEvent,
       artifactName,
       downloadPath,
     });
