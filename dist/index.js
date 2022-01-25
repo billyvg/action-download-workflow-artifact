@@ -57,6 +57,7 @@ function run() {
         const workflowEvent = core.getInput('workflowEvent');
         const artifactName = core.getInput('artifact');
         const downloadPath = core.getInput('path');
+        const ignoreError = !!core.getInput('ignoreError');
         if (!artifactName) {
             throw new Error('No artifact name provided');
         }
@@ -73,6 +74,9 @@ function run() {
         }
         catch (error) {
             if (!(error instanceof Error)) {
+                return;
+            }
+            if (ignoreError) {
                 return;
             }
             core.setFailed(error.message);
