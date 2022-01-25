@@ -37,7 +37,10 @@ async function run(): Promise<void> {
       artifactName,
       downloadPath,
     });
+    core.setOutput('result', 'success');
   } catch (error) {
+    core.setOutput('result', 'failed');
+
     if (!(error instanceof Error)) {
       return;
     }

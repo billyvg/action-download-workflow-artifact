@@ -71,8 +71,10 @@ function run() {
                 artifactName,
                 downloadPath,
             });
+            core.setOutput('result', 'success');
         }
         catch (error) {
+            core.setOutput('result', 'failed');
             if (!(error instanceof Error)) {
                 return;
             }
