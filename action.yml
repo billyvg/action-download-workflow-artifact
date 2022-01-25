@@ -13,6 +13,9 @@ inputs:
     description: 'GitHub token'
     default: '${{ github.token }}'
     required: true
+  ignoreError:
+    description: 'Do not fail when there are errors when downloading'
+    required: false
   path:
     description: 'The path to download the artifact to'
     required: false
