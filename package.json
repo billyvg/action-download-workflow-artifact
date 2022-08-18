@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@actions/artifact": "^0.6.1",
-    "@actions/core": "^1.6.0",
+    "@actions/core": "^1.9.1",
     "github-fetch-workflow-artifact": "2.0.0"
   },
   "devDependencies": {
